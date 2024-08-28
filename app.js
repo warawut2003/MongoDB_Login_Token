@@ -15,7 +15,7 @@ mongoose.connect(process.env.MONGO_URL,{
 .catch(err => console.log(err));
 
 const authRoute = require('./routes/auth');
-app.use('/api/user',authRoute);
+app.use('/api/auth',authRoute);
 
 const productRoute = require('./routes/product');
 app.use('/api/',productRoute);

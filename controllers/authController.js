@@ -7,11 +7,11 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 exports.register = async (req,res) => {
-    const {username, password,name,role} = req.body;
+    const {username, password,name,role,email} = req.body;
 
     try{
         const hashedPasswor = await bcrypt.hash(password,10);
-        const user = new User ({username, password: hashedPasswor ,name,role});
+        const user = new User ({username, password: hashedPasswor ,name,role,email});
         await user.save();
         res.status(201).send("User registered");
     }catch (err){
@@ -45,7 +45,8 @@ exports.login = async(req,res) =>{
 };
 
 exports.refresh = async(req,res) =>{
-    const {token} = req.body;
+    const token = req.headers['authorization']?.split(' ')[1]; // 'Bearer <token>'
+    
 
     if(!token) return res.sendStatus(401);
 

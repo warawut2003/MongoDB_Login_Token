@@ -31,7 +31,7 @@ exports.login = async(req,res) =>{
         const accessToken = jwt.sign(
             {userId : user._id},
             process.env.ACCESS_TOKEN_SECRET,
-            {expiresIn : "1h"}
+            {expiresIn : "15m"}
         );
         const refreshToken = jwt.sign(
             {userId: user._id},
@@ -46,16 +46,14 @@ exports.login = async(req,res) =>{
 
 exports.refresh = async(req,res) =>{
     const token = req.headers['authorization']?.split(' ')[1]; // 'Bearer <token>'
-    
-
-    if(!token) return res.sendStatus(401);
-
+    if (!token) return res.status(401).json({ message: 'No token provided' });
     jwt.verify(token , process.env.REFRESH_TOKEN_SECRET, (err, user)=>{
         if(err) return res.sendStatus(403);
+
         const accessToken = jwt.sign(
             {userID: user.userId},
             process.env.ACCESS_TOKEN_SECRET,
-            {expiresIn:"2h"}
+            {expiresIn:"30m"}
         );
         res.json({accessToken});
     })

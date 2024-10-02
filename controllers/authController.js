@@ -31,11 +31,12 @@ exports.login = async(req,res) =>{
         const accessToken = jwt.sign(
             {userId : user._id},
             process.env.ACCESS_TOKEN_SECRET,
-            {expiresIn : "15m"}
+            {expiresIn : "1m"}
         );
         const refreshToken = jwt.sign(
             {userId: user._id},
-            process.env.REFRESH_TOKEN_SECRET
+            process.env.REFRESH_TOKEN_SECRET,
+            { expiresIn: "2m" } 
         );
         res.json({user,accessToken, refreshToken});
 
@@ -48,12 +49,17 @@ exports.refresh = async(req,res) =>{
     const token = req.headers['authorization']?.split(' ')[1]; // 'Bearer <token>'
     if (!token) return res.status(401).json({ message: 'No token provided' });
     jwt.verify(token , process.env.REFRESH_TOKEN_SECRET, (err, user)=>{
-        if(err) return res.sendStatus(403);
+        if (err) {
+            if (err.name === "TokenExpiredError") {
+                return res.status(401).send("Refresh token expired. Please log in again.");
+            }
+            return res.status(403).send("Invalid refresh token");
+        }
 
         const accessToken = jwt.sign(
             {userID: user.userId},
             process.env.ACCESS_TOKEN_SECRET,
-            {expiresIn:"30m"}
+            {expiresIn:"1m"}
         );
         res.json({accessToken});
     })
